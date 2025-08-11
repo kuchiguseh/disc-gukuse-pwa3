@@ -108,6 +108,7 @@ function computeResult(){
     </div>
     <p>${pack.humor||''}</p>`;
   document.getElementById('result-content').innerHTML = resultHTML + renderRich(pack, main);
+  window.LAST_EXPORT={counts:counts, pack:pack, main:main};
 
   // history
   const hist=loadHistory();
@@ -134,19 +135,6 @@ function renderPractice(mainKey){
   return `<h3 class="section-title">今日から試せる実践メニュー</h3><ol class="kg-ol">${items}</ol>`;
 }
 
-function drawPNG(pack){
-  const W=1000,H=760,P=40; const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d');
-  const grad=g.createLinearGradient(0,0,W,0); grad.addColorStop(0,'#ffe3ec'); grad.addColorStop(1,'#fdf5ff');
-  g.fillStyle=grad; g.fillRect(0,0,W,H);
-  g.fillStyle='#e85a8b'; g.font='bold 42px system-ui, sans-serif'; g.fillText('DISC別口ぐせ診断', P, 80);
-  g.fillStyle='#333'; g.font='28px system-ui, sans-serif'; g.fillText(`タイプ：${pack.title.replace(/^.. /,'')}`, P, 140);
-  g.font='22px system-ui, sans-serif'; g.fillText(new Date().toLocaleString('ja-JP'), P, 180);
-  g.font='bold 26px system-ui, sans-serif'; g.fillText('Top3口ぐせ', P, 230);
-  g.font='24px system-ui, sans-serif'; (pack.top||[]).forEach((t,i)=> g.fillText(`${i+1}. ${t}`, P, 270+i*34));
-  g.font='bold 26px system-ui, sans-serif'; g.fillText('今日の処方箋', P, 360);
-  g.font='22px system-ui, sans-serif'; (pack.rephrase||[]).slice(0,2).forEach((t,i)=> g.fillText(`・${t}`, P, 400+i*30));
-  const url=c.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='kuchiguse-result.png'; a.click();
-}
 
 document.addEventListener('DOMContentLoaded', ()=>{
   const elData=document.getElementById('APP_DATA'); if(elData){ try{ DATA=JSON.parse(elData.textContent);}catch(e){} }
@@ -165,6 +153,88 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(navigator.share){ navigator.share({title,text,url}).catch(()=>{}); } else { alert(url); }
   };
   document.getElementById('download-result').onclick = ()=>{
-    const hist=loadHistory(); const key=hist?.[0]?.key || 'D'; const pack=DATA.prescriptions[key]; drawPNG(pack);
+    if(window.LAST_EXPORT){ drawFullPNG(); } else { alert('結果を生成後に保存してください'); }
   };
 });
+
+
+function drawWrapped(g, text, x, y, maxW, lineH){
+  const words = String(text||'').split(/\s+/);
+  let line = "", yy = y;
+  for(let i=0;i<words.length;i++){
+    const test = line ? line + " " + words[i] : words[i];
+    if(g.measureText(test).width > maxW){
+      g.fillText(line, x, yy); line = words[i]; yy += lineH;
+    }else{ line = test; }
+  }
+  if(line){ g.fillText(line, x, yy); yy += lineH; }
+  return yy;
+}
+function drawSectionTitle(g, label, y){
+  g.fillStyle='#555'; g.font='bold 22px system-ui, sans-serif';
+  g.fillText(label, 40, y);
+  return y + 10;
+}
+function drawStats(g, counts, y){
+  const order=['D','I','S','C']; const labels={D:'Dタイプ',I:'Iタイプ',S:'Sタイプ',C:'Cタイプ'};
+  const colors={D:'#ff6b6b',I:'#ffb649',S:'#6ad189',C:'#66a6ff'};
+  const max = Math.max(1, ...order.map(k=>counts[k]||0));
+  let yy = y;
+  order.forEach(k=>{
+    const v = counts[k]||0;
+    g.fillStyle='#333'; g.font='bold 20px system-ui, sans-serif';
+    g.fillText(labels[k], 40, yy+22);
+    g.fillStyle='#f1f1f1'; g.fillRect(120, yy+10, 600, 16);
+    g.fillStyle=colors[k]; g.fillRect(120, yy+10, Math.round(600*v/max), 16);
+    g.fillStyle='#333'; g.font='18px system-ui, sans-serif';
+    g.fillText(`${v}問`, 740, yy+22);
+    yy += 36;
+  });
+  return yy + 10;
+}
+function drawList(g, items, x, y, bullet='・', lineH=30){
+  let yy=y;
+  g.font='22px system-ui, sans-serif'; g.fillStyle='#333';
+  (items||[]).forEach(t=>{ g.fillText(`${bullet}${t}`, x, yy); yy += lineH; });
+  return yy;
+}
+function drawFullPNG(){
+  const exp = window.LAST_EXPORT;
+  if(!exp){ alert('結果がありません'); return; }
+  const {counts, pack, main} = exp;
+  const W=1100, H=1700, P=40;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const g=c.getContext('2d');
+  const grad=g.createLinearGradient(0,0,W,0); grad.addColorStop(0,'#ffe3ec'); grad.addColorStop(1,'#fdf5ff');
+  g.fillStyle=grad; g.fillRect(0,0,W,H);
+  g.fillStyle='#e85a8b'; g.font='bold 42px system-ui, sans-serif'; g.fillText('DISC別口ぐせ診断', P, 70);
+  g.fillStyle='#333'; g.font='24px system-ui, sans-serif'; g.fillText(new Date().toLocaleString('ja-JP'), W-380, 70);
+  g.fillStyle='#e24e86'; g.font='bold 24px system-ui, sans-serif'; g.fillText(`タイプ：${pack.title.replace(/^.. /,'')}`, P, 110);
+  g.fillStyle='#333'; g.font='22px system-ui, sans-serif';
+  let y = drawWrapped(g, pack.humor||'', P, 145, W-2*P, 28);
+  y = drawSectionTitle(g, 'あなたの回答傾向（選択数）', y+10);
+  y = drawStats(g, counts, y+6);
+  y = drawSectionTitle(g, 'あなたがよく使っている口ぐせはこの３つ！', y+14);
+  y = drawList(g, pack.top||[], P, y+30, '・', 30);
+  y = drawSectionTitle(g, 'タイプ別 口ぐせ処方箋', y+10);
+  g.fillStyle='#e24e86'; g.font='bold 22px system-ui, sans-serif'; g.fillText(`(${main}) ${pack.title.replace(/^.. /,'')}の処方箋`, P, y+30);
+  y += 60;
+  g.fillStyle='#333'; g.font='22px system-ui, sans-serif'; y = drawWrapped(g, pack.copy||'', P, y, W-2*P, 28);
+  y = drawSectionTitle(g, '言い換え提案', y+10);
+  y = drawList(g, pack.rephrase||[], P, y+30, '・', 30);
+  y = drawSectionTitle(g, '自分を整える口ぐせ', y+10);
+  const selfItems = [pack.self, ...(pack.self_extra||[])].filter(Boolean);
+  y = drawList(g, selfItems, P, y+30, '・', 30);
+  y = drawSectionTitle(g, '場面別スクリプト', y+10);
+  const scriptItems = (pack.scripts||[]).map(x=> (x.tag?`【${x.tag}】`:'') + x.text);
+  y = drawList(g, scriptItems, P, y+30, '・', 30);
+  y = drawSectionTitle(g, '今日から試せる実践メニュー', y+10);
+  const practiceMap={
+    D:["朝一番に「〇〇な一日になる！」と声に出す","週替わりでテーマ口ぐせを決める","3日・3週間・3ヶ月の習慣化マイルストーンを決める"],
+    I:["家族・友人に「私の口ぐせって何？」と聞いてみる","好きな音楽＋口ぐせでテンションを上げる","週に一度、ポジティブしりとりで遊ぶ"],
+    S:["感情が揺れた瞬間に「大丈夫」とつぶやく","「ありがとう日記」を毎晩書く","自然の中で深呼吸しながら口ぐせを唱える"],
+    C:["今日の口ぐせを寝る前にメモする","ネガティブ→ポジティブ置き換え辞書を作る","ZOOM録音やスマホで自分の話し方をチェックする"]
+  };
+  y = drawList(g, practiceMap[main]||[], P, y+30, '・', 30);
+  const url=c.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='kuchiguse-result-full.png'; a.click();
+}
