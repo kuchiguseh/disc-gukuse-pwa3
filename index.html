@@ -7,6 +7,104 @@
   <meta name="theme-color" content="#e85a8b" />
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── 結果画面：PDFレポート風スタイル ── */
+    .report-wrap { max-width: 720px; margin: 0 auto; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+
+    /* ヘッダーボックス */
+    .report-header { background: linear-gradient(135deg, #fff5f0 0%, #fff9f5 100%); border: 1.5px solid #f5c5a3; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+    .report-header .type-label { font-size: 12px; color: #e07040; font-weight: 600; margin-bottom: 4px; }
+    .report-header .type-name { font-size: 26px; font-weight: 700; color: #c94a1a; margin-bottom: 6px; }
+    .report-header .type-catch { font-size: 14px; color: #555; line-height: 1.6; }
+    .report-date { font-size: 12px; color: #999; text-align: right; margin-bottom: 4px; }
+
+    /* セクションタイトル共通 */
+    .section-bar { background: #4a7fa5; color: #fff; font-size: 14px; font-weight: 700; padding: 7px 14px; border-radius: 6px; margin: 14px 0 10px; }
+    .section-bar.orange { background: #e07040; }
+    .section-bar.green  { background: #5a9a6a; }
+    .section-bar.purple { background: #8a6ab5; }
+    .section-bar.pink   { background: #d4507a; }
+    .section-bar.teal   { background: #3a8a8a; }
+    .section-bar.gray   { background: #666; }
+
+    /* 回答傾向バー */
+    .stats-section { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+    .stat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .stat-row:last-child { margin-bottom: 0; }
+    .stat-label { width: 56px; font-size: 13px; font-weight: 600; color: #333; flex-shrink: 0; }
+    .stat-bar-wrap { flex: 1; height: 14px; background: #f0f0f0; border-radius: 7px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 7px; transition: width 0.8s ease; }
+    .fill-d { background: #e85a5a; }
+    .fill-i { background: #f0a030; }
+    .fill-s { background: #50b870; }
+    .fill-c { background: #4a90d9; }
+    .stat-count { width: 32px; font-size: 13px; color: #666; text-align: right; flex-shrink: 0; }
+
+    /* TOP3タグ */
+    .top3-wrap { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .top3-tag { padding: 7px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    .top3-tag.d { background: #fde8e8; color: #c03030; }
+    .top3-tag.i { background: #fef0d8; color: #b06010; }
+    .top3-tag.s { background: #e8f5ec; color: #2a7a3a; }
+    .top3-tag.c { background: #e0eefa; color: #1a60a0; }
+
+    /* 言い換え提案テーブル */
+    .rephrase-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    .rephrase-table tr { border-bottom: 1px solid #f0f0f0; }
+    .rephrase-table td { padding: 10px 8px; font-size: 14px; vertical-align: middle; }
+    .rephrase-bad  { color: #555; width: 38%; }
+    .rephrase-arrow { color: #e07040; font-weight: 700; width: 8%; text-align: center; }
+    .rephrase-good { color: #1a60a0; font-weight: 600; background: #f0f7ff; border-radius: 6px; padding: 8px 10px !important; width: 54%; }
+
+    /* 自分を整える口ぐせ：3カラム */
+    .self-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0; }
+    .self-card { background: #f9f9f9; border-radius: 8px; padding: 12px 10px; text-align: center; font-size: 13px; }
+    .self-card .self-main { font-weight: 700; color: #333; line-height: 1.5; margin-bottom: 6px; }
+    .self-card .self-ex { color: #888; font-size: 12px; }
+
+    /* 場面別スクリプト */
+    .script-row { background: #f9f9f9; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+    .script-tag { display: inline-block; background: #4a7fa5; color: #fff; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 4px; margin-bottom: 6px; }
+    .script-main { font-size: 14px; color: #222; font-weight: 600; margin-bottom: 4px; }
+    .script-ex { font-size: 12px; color: #888; }
+
+    /* 実践メニュー */
+    .practice-list { list-style: none; padding: 0; margin: 8px 0; }
+    .practice-list li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #333; display: flex; align-items: flex-start; gap: 8px; }
+    .practice-list li::before { content: '✓'; color: #e07040; font-weight: 700; flex-shrink: 0; }
+
+    /* DISCとは？ */
+    .disc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+    .disc-card { border-radius: 8px; padding: 12px 14px; }
+    .disc-card.d { background: #fde8e8; border: 1px solid #f5c0c0; }
+    .disc-card.i { background: #fef0d8; border: 1px solid #f5d8a0; }
+    .disc-card.s { background: #e8f5ec; border: 1px solid #b0d8b8; }
+    .disc-card.c { background: #e0eefa; border: 1px solid #a0c8f0; }
+    .disc-card .disc-type { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: #333; }
+    .disc-card .disc-sub  { font-size: 12px; color: #666; margin-bottom: 6px; }
+    .disc-card .disc-ex   { font-size: 12px; color: #444; line-height: 1.7; }
+
+    /* プロフィール */
+    .profile-box { display: flex; gap: 16px; align-items: flex-start; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 16px; margin: 14px 0; flex-wrap: wrap; }
+    .profile-left { flex: 0 0 auto; }
+    .profile-left img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+    .profile-right { flex: 1; }
+    .profile-name { font-size: 13px; font-weight: 700; color: #e07040; margin-bottom: 4px; }
+    .profile-desc { font-size: 13px; color: #444; line-height: 1.7; }
+    .seminar-box { flex: 1; min-width: 200px; }
+    .seminar-title { font-size: 13px; font-weight: 700; color: #4a7fa5; margin-bottom: 6px; }
+    .seminar-desc  { font-size: 13px; color: #444; line-height: 1.7; }
+    .apply-btn { display: inline-block; background: #e07040; color: #fff; font-size: 13px; font-weight: 700; padding: 7px 18px; border-radius: 20px; margin-top: 8px; text-decoration: none; }
+
+    /* フッター帯 */
+    .report-footer-bar { background: #4a7fa5; color: #fff; text-align: center; font-size: 12px; padding: 10px; border-radius: 0 0 10px 10px; margin-top: 16px; }
+
+    @media (max-width: 500px) {
+      .self-grid { grid-template-columns: 1fr; }
+      .disc-grid  { grid-template-columns: 1fr; }
+      .profile-box { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
   <header class="app-header">
@@ -16,7 +114,7 @@
   <main>
     <section id="home" class="card">
       <h1>あなたらしさを見つける、やさしい診断</h1>
-      <p>10問に答えるだけで、あなたのタイプと“今のあなたに合う言葉”がわかります。</p>
+      <p>10問に答えるだけで、あなたのタイプと"今のあなたに合う言葉"がわかります。</p>
       <button id="start-btn" class="primary">診断をはじめる</button>
       <div id="recent-section" class="recent hidden">
         <h2>最近の結果</h2>
@@ -26,7 +124,7 @@
     </section>
 
     <section id="quiz" class="card hidden">
-      <div class="progress"><div id="progress-bar"></"></div></div>
+      <div class="progress"><div id="progress-bar"></div></div>
       <h2 id="q-title"></h2>
       <p id="q-count" class="hint"></p>
       <div id="choices" class="choices"></div>
@@ -45,6 +143,7 @@
       <div class="share">
         <button id="share-btn" class="secondary">SNSでシェア</button>
         <button id="download-result" class="ghost">結果を保存（PNG）</button>
+        <button id="restartBtn" class="ghost" onclick="showSection('home')">もう一度診断する</button>
       </div>
     </section>
   </main>
@@ -68,82 +167,90 @@
     "map": ["D","I","S","C"],
     "prescriptions": {
       "D": {
-        "title": "🌹 行動派のあなた",
+        "title": "行動派のあなた (D)",
         "copy": "自信は魅力。その強さに思いやりを少し足せば、信頼はさらに深まる。",
         "top": ["よし、やってみよう！","今がチャンス！","協力こそ最速の方法"],
-        "humor": "あなたが動くと空気が“やる気色”に変わります☀️",
+        "humor": "行動力と決断力にあふれるリーダー気質です。目標に向かって一直線に動ける反面、「なんでやらないの？」「早くして」という口ぐせが出やすいことも。あなたが動くと空気が"やる気色"に変わります。",
         "rephrase": [
-          "「こうして！」 → 「こうしてもらえると助かります」",
-          "「早くして」 → 「○時までにお願いできますか？」",
-          "「それ違う」 → 「こうすると、もっと良くなります」"
+          {"bad":"「こうして！」","good":"「こうしてもらえると助かります」"},
+          {"bad":"「早くして」","good":"「〇時までにお願いできますか？」"},
+          {"bad":"「それ違う」","good":"「こうすると、もっと良くなります」"}
         ],
-        "self": "私は一人でやらなくていい",
-        "self_extra": ["人の力を借りても成果は出せる","協力こそ最速の方法"],
+        "self": ["私は一人でやらなくていい","人の力を借りても成果は出せる","協力こそ最速の方法"],
+        "self_ex": ["例）「みんなと一緒に進もう」","例）「頼ることも強さのひとつ」","例）「チームで動くと早く進む」"],
         "scripts": [
-          {"tag":"相談","text":"実現するには何が必要か、一緒に考えませんか？"},
-          {"tag":"お願い","text":"これを○時までにお願いできると助かります"}
-        ]
+          {"tag":"相談","text":"実現するには何が必要か、一緒に考えませんか？","ex":"例）「あなたの意見も聞かせてください」"},
+          {"tag":"お願い","text":"これを〇時までにお願いできると助かります","ex":"例）「期限を決めて動きましょう」"}
+        ],
+        "practice": ["朝一番に「〇〇な一日になる！」と声に出す","週替わりでテーマ口ぐせを決める","3日・3週間・3ヶ月の習慣化マイルストーンを決める"],
+        "color": "d"
       },
       "I": {
-        "title": "💐 社交派のあなた",
-        "copy": "その明るさを、安心と行動の後押しに変えて届けよう。",
+        "title": "社交派のあなた (I)",
+        "copy": "周りをポジティブに染める"ひまわり"です。明るさを、安心と行動の後押しに変えて届けよう。",
         "top": ["楽しみだね！","それ素敵！","こうすればうまくいく！"],
-        "humor": "あなたは周りをポジティブに染める“ひまわり”です🌻",
+        "humor": "明るさと社交性があふれ、その場を盛り上げる天才です。楽観的で表現力豊かな反面、「たぶん大丈夫」「なんとかなる」という根拠なしの言葉が出やすいことも。あなたの笑顔が周りの背中を押します。",
         "rephrase": [
-          "「たぶん大丈夫」 → 「○○すれば、きっと大丈夫！」",
-          "「とにかくやってみよう！」 → 「まず準備してから、やってみよう！」",
-          "「なんとかなる」 → 「工夫すれば、できるよ！」"
+          {"bad":"「たぶん大丈夫」","good":"「○○すれば、きっと大丈夫！」"},
+          {"bad":"「とにかくやってみよう！」","good":"「まず準備してから、やってみよう！」"},
+          {"bad":"「なんとかなる」","good":"「工夫すれば、できるよ！」"}
         ],
-        "self": "私は焦らなくても魅力的",
-        "self_extra": ["根拠を添えると、もっと伝わる","明るさは“準備”とセットで輝く"],
+        "self": ["私は焦らなくても魅力的","根拠を添えるともっと伝わる","明るさは"準備"とセットで輝く"],
+        "self_ex": ["例）「今日も私らしくいこう」","例）「なぜなら〜だから」","例）「まず確認してから動こう」"],
         "scripts": [
-          {"tag":"相談","text":"こうすればうまくいくと思うんだけど、どうかな？"},
-          {"tag":"お願い","text":"○○を用意してから、お願いできる？"}
-        ]
-      },
-      "C": {
-        "title": "🌼 こだわり派のあなた",
-        "copy": "正確さは強み。その安心感を育てる言葉に変えていこう。",
-        "top": ["ちゃんと確認しよう","段取りが大事","美しく仕上げたい"],
-        "humor": "あなたの丁寧さは四つ葉のクローバーみたいな宝物です🍀",
-        "rephrase": [
-          "「それは違います」 → 「こういう見方もあります」",
-          "「ルールでは…」 → 「ルールでは○○ですが、どうしましょうか？」",
-          "「間違ってます」 → 「ここをこう直すと、正しくなります」"
+          {"tag":"相談","text":"こうすればうまくいくと思うんだけど、どうかな？","ex":"例）「一緒に考えてもらえると嬉しいな」"},
+          {"tag":"お願い","text":"○○を用意してから、お願いできる？","ex":"例）「準備できたら声かけてね」"}
         ],
-        "self": "私は完璧でなくても価値がある",
-        "self_extra": ["正しさより関係性が大事な時もある","事実と意見は分けて伝えられる"],
-        "scripts": [
-          {"tag":"相談","text":"ここは、こういう方法もあるのですが、どう思われますか？"},
-          {"tag":"お願い","text":"この手順でやってもらえると助かります"}
-        ]
+        "practice": ["家族・友人に「私の口ぐせって何？」と聞いてみる","好きな音楽＋口ぐせでテンションを上げる","週に一度、ポジティブしりとりで遊ぶ"],
+        "color": "i"
       },
       "S": {
-        "title": "🌷 思いやり派のあなた",
-        "copy": "その優しさは強さ。自分にも同じ温かさを向けよう。",
+        "title": "思いやり派のあなた (S)",
+        "copy": "あなたの言葉はホットミルクみたいにじんわり温まります。その優しさは強さ。自分にも同じ温かさを向けよう。",
         "top": ["大丈夫？","いつもありがとう","無理しないでね"],
-        "humor": "あなたの言葉はホットミルクみたいにじんわり温まります☕️",
+        "humor": "協調性と思いやりにあふれた、チームの安定剤です。周りへの気配りが得意な反面、「ごめんなさい」「私なんて…」という自己否定の口ぐせが出やすいことも。あなたの温かさが場を安心させます。",
         "rephrase": [
-          "「ごめんなさい」 → 「ありがとう」",
-          "「私なんて…」 → 「私にもできる」",
-          "「迷惑かけちゃうかも」 → 「助けてもらえて、うれしい」"
+          {"bad":"「ごめんなさい」","good":"「ありがとう」"},
+          {"bad":"「私なんて…」","good":"「私にもできる」"},
+          {"bad":"「迷惑かけちゃうかも」","good":"「助けてもらえて、うれしい」"}
         ],
-        "self": "私はまわりに安心を届けられる",
-        "self_extra": ["「私は」を主語に、そっと伝える","休むことも大事な一歩"],
+        "self": ["私はまわりに安心を届けられる","「私は」を主語にそっと伝える","休むことも大事な一歩"],
+        "self_ex": ["例）「あなたの存在が力になる」","例）「私はこう感じています」","例）「今日はゆっくりしよう」"],
         "scripts": [
-          {"tag":"相談","text":"ありがとうございます。少しご相談させてください"},
-          {"tag":"お願い","text":"お願いできると心強いです"}
-        ]
+          {"tag":"相談","text":"ありがとうございます。少しご相談させてください","ex":"例）「聞いてもらえると嬉しいです」"},
+          {"tag":"お願い","text":"お願いできると心強いです","ex":"例）「一緒にやれると安心します」"}
+        ],
+        "practice": ["感情が揺れた瞬間に「大丈夫」とつぶやく","「ありがとう日記」を毎晩書く","自然の中で深呼吸しながら口ぐせを唱える"],
+        "color": "s"
+      },
+      "C": {
+        "title": "こだわり派のあなた (C)",
+        "copy": "あなたの丁寧さは四つ葉のクローバーみたいな宝物です。正確さは強み。その安心感を育てる言葉に変えていこう。",
+        "top": ["ちゃんと確認しよう","段取りが大事","美しく仕上げたい"],
+        "humor": "分析力と正確さにこだわる、品質の番人です。丁寧で几帳面な反面、「それは違います」「ルールでは…」という正論が出やすいことも。あなたの丁寧さが周りに安心を与えます。",
+        "rephrase": [
+          {"bad":"「それは違います」","good":"「こういう見方もあります」"},
+          {"bad":"「ルールでは…」","good":"「ルールでは○○ですが、どうしましょうか？」"},
+          {"bad":"「間違ってます」","good":"「ここをこう直すと、正しくなります」"}
+        ],
+        "self": ["私は完璧でなくても価値がある","正しさより関係性が大事な時もある","事実と意見は分けて伝えられる"],
+        "self_ex": ["例）「今日も丁寧にできた」","例）「まず相手の気持ちを聞こう」","例）「私の考えでは〜です」"],
+        "scripts": [
+          {"tag":"相談","text":"こういう方法もあるのですが、どう思われますか？","ex":"例）「確認してから進めましょう」"},
+          {"tag":"お願い","text":"この手順でやってもらえると助かります","ex":"例）「段取りを確認させてください」"}
+        ],
+        "practice": ["今日の口ぐせを寝る前にメモする","ネガティブ→ポジティブ置き換え辞書を作る","ZOOM録音やスマホで自分の話し方をチェックする"],
+        "color": "c"
       }
     }
   }
   </script>
 
   <script src="app.js"></script>
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js");
-  }
-</script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
 </body>
 </html>
