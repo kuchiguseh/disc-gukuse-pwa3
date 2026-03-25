@@ -88,36 +88,38 @@ function renderQuiz() {
   const qIndex = state.order[state.step];
   const q = DATA.questions[qIndex];
 
-  $("#q-title").textContent = q.q;
-  $("#q-count").textContent = `${state.step + 1} / ${DATA.questions.length}`;
-  $("#progress-bar").style.width = `${((state.step + 1) / DATA.questions.length) * 100}%`;
+  document.getElementById("q-title").textContent = q.q;
+  document.getElementById("q-count").textContent = `${state.step + 1}/${DATA.questions.length}`;
+  document.getElementById("progress-bar").style.width =
+    `${((state.step + 1) / DATA.questions.length) * 100}%`;
 
-  const choicesEl = $("#choices");
+  const choicesEl = document.getElementById("choices");
   choicesEl.innerHTML = "";
 
   const choiceIndexes = shuffle([0, 1, 2, 3]);
 
   choiceIndexes.forEach((choiceIdx) => {
     const btn = document.createElement("button");
-    btn.className = "choice";
     btn.type = "button";
+    btn.className = "choice";
     btn.textContent = q.choices[choiceIdx];
-    btn.onclick = () => {
+
+    btn.addEventListener("click", () => {
       state.answers[state.step] = choiceIdx;
       state.step += 1;
+      saveState(state);
 
       if (state.step >= DATA.questions.length) {
-        saveState(state);
         renderResult();
       } else {
-        saveState(state);
         renderQuiz();
       }
-    };
+    });
+
     choicesEl.appendChild(btn);
   });
 
-  const prevBtn = $("#prev-btn");
+  const prevBtn = document.getElementById("prev-btn");
   prevBtn.disabled = state.step === 0;
   prevBtn.onclick = () => {
     if (state.step > 0) {
