@@ -154,3 +154,70 @@ main{max-width:760px;margin:16px auto;padding:0 12px}
   width: 40px;
   text-align: right;
 }
+/* 全体をレポート風に */
+.result-sheet {
+  background: #fdeff4;
+  padding: 24px 32px;
+  border-radius: 12px;
+  font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+
+/* タイトル */
+.result-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #e85a8b;
+}
+
+/* 日付 */
+.result-date {
+  font-size: 14px;
+  color: #555;
+}
+
+/* タイプ */
+.result-type-line {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e85a8b;
+  margin-top: 8px;
+}
+
+/* セクションタイトル */
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 18px;
+}
+
+/* リスト */
+.plain-list {
+  margin-left: 18px;
+}
+
+.plain-list li {
+  margin: 4px 0;
+}
+
+/* グラフ背景を薄く */
+.stat-bar-wrap {
+  background: #e6e6e6;
+}
+
+/* 前回結果 */
+#prev-result {
+  background: #f3e6eb;
+  border-radius: 10px;
+  padding: 12px;
+}
+const colorMap = {
+  D: "#f06a5a",  // 赤
+  I: "#f5a623",  // オレンジ
+  S: "#5ac878",  // 緑
+  C: "#4a90e2"   // 青
+};
+.big-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 20px;
+}
