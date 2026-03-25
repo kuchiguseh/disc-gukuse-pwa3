@@ -1,4 +1,4 @@
-const CACHE_NAME = "disc-pwa-v3";
+const CACHE_NAME = "disc-pwa-v4";
 
 const urlsToCache = [
   "./",
