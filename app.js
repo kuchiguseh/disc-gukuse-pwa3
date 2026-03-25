@@ -275,26 +275,26 @@ function renderResult() {
   };
 
   const colorMap = {
-    D: "#ee8a5a",
-    I: "#f0a030",
-    S: "#50b870",
-    C: "#4a90d9"
+    D: "#f06a5a",
+    I: "#f5a623",
+    S: "#5ac878",
+    C: "#4a90e2"
   };
 
   const max = Math.max(...Object.values(counts));
 
   const statsHtml = `
-    <div class="stats-section">
-      <div class="section-bar section-bar-gray">あなたの回答傾向（選択数）</div>
+    <div class="report-section">
+      <div class="report-section-title">あなたの回答傾向（選択数）</div>
       ${["D", "I", "S", "C"].map((key) => {
         const width = max > 0 ? (counts[key] / max) * 100 : 0;
         return `
-          <div class="stat-row">
-            <div class="stat-label">${key}タイプ</div>
-            <div class="stat-bar-wrap">
-              <div class="stat-bar-fill" style="width:${width}%; background:${colorMap[key]};"></div>
+          <div class="report-stat-row">
+            <div class="report-stat-label">${key}タイプ</div>
+            <div class="report-stat-bar">
+              <div class="report-stat-fill" style="width:${width}%; background:${colorMap[key]};"></div>
             </div>
-            <div class="stat-count">${counts[key]}問</div>
+            <div class="report-stat-count">${counts[key]}問</div>
           </div>
         `;
       }).join("")}
@@ -302,38 +302,38 @@ function renderResult() {
   `;
 
   const topHtml = `
-    <div class="top3-block">
-      <div class="section-title">あなたがよく使っている口ぐせはこの３つ！</div>
-      <ul class="plain-list">
+    <div class="report-block">
+      <div class="report-mid-title">あなたがよく使っている口ぐせはこの３つ！</div>
+      <ul class="report-list">
         ${pack.top.map((t) => `<li>${t}</li>`).join("")}
       </ul>
     </div>
   `;
 
   const rephraseHtml = `
-    <div class="section-title">言い換え提案</div>
-    <ul class="plain-list">
-      ${pack.rephrase.map((item) => `<li>「${item.bad}」→「${item.good}」</li>`).join("")}
-    </ul>
+    <div class="report-mid-title">言い換え提案</div>
+    <div class="report-lines">
+      ${pack.rephrase.map((item) => `<div>「${item.bad}」→「${item.good}」</div>`).join("")}
+    </div>
   `;
 
   const selfHtml = `
-    <div class="section-title">自分を整える口ぐせ</div>
-    <ul class="plain-list">
+    <div class="report-mid-title">自分を整える口ぐせ</div>
+    <ul class="report-list">
       ${pack.self.map((item) => `<li>${item}</li>`).join("")}
     </ul>
   `;
 
   const scriptHtml = `
-    <div class="section-title">場面別スクリプト</div>
-    <div class="plain-script">
+    <div class="report-mid-title">場面別スクリプト</div>
+    <div class="report-lines">
       ${pack.scripts.map((item) => `<div>【${item.tag}】${item.text}</div>`).join("")}
     </div>
   `;
 
   const practiceHtml = `
-    <div class="section-title">今日から試せる実践メニュー</div>
-    <ul class="plain-list">
+    <div class="report-mid-title">今日から試せる実践メニュー</div>
+    <ul class="report-list">
       ${pack.practice.map((item) => `<li>${item}</li>`).join("")}
     </ul>
   `;
@@ -343,21 +343,22 @@ function renderResult() {
   $("#result-stats").innerHTML = "";
 
   $("#result-content").innerHTML = `
-    <div class="result-sheet">
-      <div class="result-head">
-        <div class="result-title">DISC別口ぐせ診断</div>
-        <div class="result-date">${now}</div>
+    <div class="report-wrap" id="result-sheet">
+      <div class="report-header">
+        <div class="report-header-left">
+          <div class="report-title">DISC別口ぐせ診断</div>
+          <div class="report-type">タイプ：${typeLabelMap[mainType]}</div>
+          <div class="report-humor">${pack.humor} ${humorIconMap[mainType] || ""}</div>
+        </div>
+        <div class="report-date">${now}</div>
       </div>
-
-      <div class="result-type-line">タイプ：${typeLabelMap[mainType]}</div>
-      <div class="result-humor">${pack.humor} ${humorIconMap[mainType] || ""}</div>
 
       ${statsHtml}
       ${topHtml}
 
-      <div class="section-title big-title">タイプ別 口ぐせ処方箋</div>
-      <div class="result-pack-title">(${mainType}) ${typeLabelMap[mainType]}の処方箋</div>
-      <div class="result-copy">${pack.copy}</div>
+      <div class="report-big-title">タイプ別 口ぐせ処方箋</div>
+      <div class="report-pack-title">(${mainType}) ${typeLabelMap[mainType]}の処方箋</div>
+      <div class="report-copy">${pack.copy}</div>
 
       ${rephraseHtml}
       ${selfHtml}
