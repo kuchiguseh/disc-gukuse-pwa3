@@ -1,11 +1,11 @@
-const CACHE_NAME = "disc-pwa-v2";
+const CACHE_NAME = "disc-pwa-v3";
 
 const urlsToCache = [
   "./",
-  "./インデックス.html",
-  "./スタイル.css",
-  "./アプリ.js",
-  "./マニフェスト.json"
+  "./index.html",
+  "./styles.css",
+  "./app.js",
+  "./manifest.json"
 ];
 
 // インストール時にキャッシュ
@@ -34,11 +34,15 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// オフライン対応
+// オフライン対応（常に最新版を優先）
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(response => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
