@@ -260,37 +260,109 @@ function renderResult() {
   const mainType = getMainType(counts);
   const pack = DATA.prescriptions[mainType];
 
-  $("#result-stats").innerHTML = renderStats(counts);
+  const typeLabelMap = {
+    D: "行動派のあなた",
+    I: "社交派のあなた",
+    S: "思いやり派のあなた",
+    C: "こだわり派のあなた"
+  };
+
+  const humorIconMap = {
+    D: "☀️",
+    I: "🌻",
+    S: "☕",
+    C: "🍀"
+  };
+
+  const colorMap = {
+    D: "#ee8a5a",
+    I: "#f0a030",
+    S: "#50b870",
+    C: "#4a90d9"
+  };
+
+  const max = Math.max(...Object.values(counts));
+
+  const statsHtml = `
+    <div class="stats-section">
+      <div class="section-bar section-bar-gray">あなたの回答傾向（選択数）</div>
+      ${["D", "I", "S", "C"].map((key) => {
+        const width = max > 0 ? (counts[key] / max) * 100 : 0;
+        return `
+          <div class="stat-row">
+            <div class="stat-label">${key}タイプ</div>
+            <div class="stat-bar-wrap">
+              <div class="stat-bar-fill" style="width:${width}%; background:${colorMap[key]};"></div>
+            </div>
+            <div class="stat-count">${counts[key]}問</div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  const topHtml = `
+    <div class="top3-block">
+      <div class="section-title">あなたがよく使っている口ぐせはこの３つ！</div>
+      <ul class="plain-list">
+        ${pack.top.map((t) => `<li>${t}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+
+  const rephraseHtml = `
+    <div class="section-title">言い換え提案</div>
+    <ul class="plain-list">
+      ${pack.rephrase.map((item) => `<li>「${item.bad}」→「${item.good}」</li>`).join("")}
+    </ul>
+  `;
+
+  const selfHtml = `
+    <div class="section-title">自分を整える口ぐせ</div>
+    <ul class="plain-list">
+      ${pack.self.map((item) => `<li>${item}</li>`).join("")}
+    </ul>
+  `;
+
+  const scriptHtml = `
+    <div class="section-title">場面別スクリプト</div>
+    <div class="plain-script">
+      ${pack.scripts.map((item) => `<div>【${item.tag}】${item.text}</div>`).join("")}
+    </div>
+  `;
+
+  const practiceHtml = `
+    <div class="section-title">今日から試せる実践メニュー</div>
+    <ul class="plain-list">
+      ${pack.practice.map((item) => `<li>${item}</li>`).join("")}
+    </ul>
+  `;
+
+  const now = new Date().toLocaleString("ja-JP");
+
+  $("#result-stats").innerHTML = "";
 
   $("#result-content").innerHTML = `
-    <div class="report-wrap">
-      <div class="report-header">
-        <div class="type-label">${mainType}</div>
-        <div class="type-name">${pack.title}</div>
-        <div class="type-catch">${pack.humor}</div>
+    <div class="result-sheet">
+      <div class="result-head">
+        <div class="result-title">DISC別口ぐせ診断</div>
+        <div class="result-date">${now}</div>
       </div>
 
-      <div class="section-bar section-bar-pink">あなたがよく使っている口ぐせはこの３つ！</div>
-      ${renderTopTags(pack, mainType)}
+      <div class="result-type-line">タイプ：${typeLabelMap[mainType]}</div>
+      <div class="result-humor">${pack.humor} ${humorIconMap[mainType] || ""}</div>
 
-      <div class="section-bar section-bar-orange">タイプ別 口ぐせ処方箋</div>
-      <div class="disc-card ${pack.color}">
-        <div class="disc-type">${mainType}</div>
-        <div class="disc-sub">${pack.title}</div>
-        <div class="disc-copy">${pack.copy}</div>
-      </div>
+      ${statsHtml}
+      ${topHtml}
 
-      <div class="section-bar section-bar-green">言い換え提案</div>
-      ${renderRephraseTable(pack.rephrase)}
+      <div class="section-title big-title">タイプ別 口ぐせ処方箋</div>
+      <div class="result-pack-title">(${mainType}) ${typeLabelMap[mainType]}の処方箋</div>
+      <div class="result-copy">${pack.copy}</div>
 
-      <div class="section-bar section-bar-purple">自分を整える口ぐせ</div>
-      ${renderSelfCards(pack.self, pack.self_ex)}
-
-      <div class="section-bar section-bar-teal">場面別スクリプト</div>
-      ${renderScripts(pack.scripts)}
-
-      <div class="section-bar section-bar-gray">今日から試せる実践メニュー</div>
-      ${renderPractice(pack.practice)}
+      ${rephraseHtml}
+      ${selfHtml}
+      ${scriptHtml}
+      ${practiceHtml}
     </div>
   `;
 
